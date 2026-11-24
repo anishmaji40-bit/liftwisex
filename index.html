@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<!--
+  Liftwise - index.html
+  The structure (content) of the website. Three files work together:
+    index.html = what is on the page (this file)
+    style.css  = how it looks
+    script.js  = how it behaves (logging, timer, login, page switching)
+
+  The site is "multi-page" without a server: every page is a <section class="view">.
+  script.js shows one section at a time depending on the address (#home, #workouts ...).
+-->
+<html lang="en"> <!-- lang tells browsers and screen readers the page is English -->
+<head>
+  <meta charset="utf-8"> <!-- allows all characters, such as the apostrophe and the multiplication sign -->
+  <!-- Makes the page fit phone screens. viewport-fit=cover lets it use the full screen -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Liftwise – Gym Workout Planner &amp; Exercise Log</title> <!-- text shown on the browser tab -->
+
+  <!-- Google Fonts: Unbounded (headings) and DM Sans (body text) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=DM+Sans:wght@400;500;600&display=swap">
+  <!-- Our own design file -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ICON SPRITE: icons are drawn once here (hidden) and reused anywhere with <use href="#id"> -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <!-- Dumbbell icon -->
+      <symbol id="i-db" viewBox="0 0 48 48" fill="currentColor">
+        <rect x="3" y="15" width="7" height="18" rx="2"/><rect x="10" y="10" width="7" height="28" rx="2"/>
+        <rect x="17" y="22" width="14" height="4"/>
+        <rect x="31" y="10" width="7" height="28" rx="2"/><rect x="38" y="15" width="7" height="18" rx="2"/>
+      </symbol>
+      <!-- Clock / timer icon -->
+      <symbol id="i-clk" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round">
+        <circle cx="24" cy="26" r="15"/><path d="M24 17v9l6 4M19 5h10"/>
+      </symbol>
+      <!-- Bar chart icon -->
+      <symbol id="i-bar" viewBox="0 0 48 48" fill="currentColor">
+        <rect x="6" y="26" width="9" height="16" rx="2"/><rect x="19" y="14" width="9" height="28" rx="2"/>
+        <rect x="32" y="4" width="9" height="38" rx="2"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- Red message bar. It is hidden by script.js as soon as the site starts.
+       If you can still see it, the script did not load or it crashed. -->
+  <div id="loadmsg" class="loadmsg" role="alert">The website’s script has not started. If you opened index.html, keep style.css and script.js in the same folder, or open liftwise.html instead. <span id="loaderr"></span></div>
+
+  <!-- ================= HEADER / NAVIGATION (stays at the top) ================= -->
+  <header>
+    <div class="wrap">
+      <nav aria-label="Main">
+        <a class="logo" href="#home">Liftwise</a> <!-- site name, also links home -->
+
+        <!-- Page links. data-n is read by script.js to highlight the current page.
+             They are hidden until the user logs in. -->
+        <a href="#home" data-n="home">Home</a>
+        <a href="#workouts" data-n="workouts">Workouts</a>
+        <a href="#logger" data-n="logger">Log</a>
+        <a href="#progress" data-n="progress">Progress</a>
+        <a href="#about" data-n="about">About</a>
+
+        <span id="who"></span> <!-- "Hi, name" greeting, filled by script.js -->
+        <a class="btn ghost sm" href="#login" id="nLogin">Log in</a> <!-- shown only when logged out -->
+        <a class="btn sm" href="#signup" id="nSign">Sign up</a>      <!-- shown only when logged out -->
+        <button class="btn ghost sm" id="nOut" hidden>Log out</button> <!-- shown only when logged in -->
+        <button class="btn ghost sm" id="theme" aria-label="Switch light or dark theme">Theme</button> <!-- light/dark switch -->
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ================= PAGE 1: HOME ================= -->
+    <section class="view" id="v-home" hidden>
+      <div class="wrap">
+
+        <!-- Hero: headline and buttons on the left, illustration on the right -->
+        <div class="hero">
+          <div>
+            <h1>Train with a plan, not a guess.</h1>
+            <p>Choose a split, see exactly which muscles each exercise works, log your sets, and keep your rest timer one tap away. It all saves in your browser.</p>
+            <div class="acts">
+              <a class="btn" href="#workouts">Browse workouts</a>
+              <a class="btn ghost" href="#logger">Start a session</a>
+            </div>
+          </div>
+          <!-- Illustration is drawn into this box by script.js -->
+          <div class="art" id="heroArt" aria-hidden="true"></div>
+        </div>
+
+        <!-- Three feature cards -->
+        <div class="three">
+          <div class="fc"><svg><use href="#i-db"/></svg><h3>Structured splits</h3><p>Push, Pull, Legs, or Full body, so every gym visit has a purpose.</p></div>
+          <div class="fc"><svg><use href="#i-clk"/></svg><h3>Rest timer</h3><p>60, 90, or 120 seconds, with a chime when you’re ready to lift again.</p></div>
+          <div class="fc"><svg><use href="#i-bar"/></svg><h3>Weekly progress</h3><p>See which days you trained, your volume, and your streak.</p></div>
+        </div>
+
+        <!-- Split cards: script.js creates the four cards inside #spc -->
+        <div class="band">
+          <h2>Pick today’s split</h2>
+          <p class="lead">Each card shows the muscles it trains.</p>
+          <div class="sp" id="spc"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 2: WORKOUTS (exercise catalog) ================= -->
+    <section class="view" id="v-workouts" hidden> <!-- hidden = not shown until selected -->
+      <div class="wrap">
+        <h1>Workouts</h1>
+        <p class="lead" style="margin-top:12px">Pick a split, then open an exercise to see how to do it. The highlighted body shows the target muscle.</p>
+        <div class="tabs" id="tabs"></div> <!-- split tabs, created by script.js -->
+        <div class="note" id="cap"></div> <!-- note about the chosen split: what it trains, who it suits, how long it takes -->
+
+        <!-- Search box and muscle filter -->
+        <div class="tools">
+          <input id="q" type="search" placeholder="Search exercises" aria-label="Search exercises">
+          <select id="mf" aria-label="Filter by muscle"></select>
+        </div>
+
+        <div class="grid" id="grid"></div> <!-- exercise cards, created by script.js -->
+        <p class="lead" style="margin:24px 0 0">Starting ranges are general guidance for beginners. Begin light, stop if something hurts, and ask a qualified coach or doctor if you are unsure.</p>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 3: LOG (workout logger + rest timer) ================= -->
+    <section class="view" id="v-logger" hidden>
+      <div class="wrap">
+        <h1>Workout session</h1>
+        <p class="lead" style="margin-top:12px">Add exercises from the Workouts page, then record the reps and weight for each set. Press Save workout when you finish.</p>
+
+        <div class="two">
+          <!-- Left: the logger -->
+          <div class="panel">
+            <!-- Session summary: date, exercises, sets and volume (numbers filled in by script.js) -->
+            <div class="session">
+              <div><small>Session date</small><b id="sdate"></b></div>
+              <div><small>Exercises</small><b id="sEx">0</b></div>
+              <div><small>Sets logged</small><b id="sSets">0</b></div>
+              <div><small>Volume</small><b id="vol">0 kg</b></div>
+            </div>
+            <div class="row">
+              <b>Weight unit</b>
+              <!-- kg / lbs switch (aria-pressed marks the selected one) -->
+              <div class="seg" role="group" aria-label="Weight unit">
+                <button data-u="kg" aria-pressed="true">kg</button>
+                <button data-u="lbs" aria-pressed="false">lbs</button>
+              </div>
+            </div>
+            <div id="log"></div> <!-- exercises added today, created by script.js -->
+            <div class="row">
+              <button class="btn" id="save">Save workout</button>
+              <button class="btn ghost" id="clear">Clear log</button>
+            </div>
+          </div>
+
+          <!-- Right: the rest timer -->
+          <div class="panel" style="text-align:center">
+            <h3>Rest timer</h3>
+            <div class="ring">
+              <!-- Two circles: grey track + coloured progress (#ringp) -->
+              <svg viewBox="0 0 200 200">
+                <circle class="t" cx="100" cy="100" r="88"/>
+                <circle class="p" id="ringp" cx="100" cy="100" r="88"/>
+              </svg>
+              <span id="clock">0:00</span> <!-- countdown number -->
+            </div>
+            <!-- data-t = how many seconds to count down -->
+            <div class="pre">
+              <button class="btn ghost sm" data-t="60">60s</button>
+              <button class="btn ghost sm" data-t="90">90s</button>
+              <button class="btn ghost sm" data-t="120">120s</button>
+            </div>
+            <div class="pre">
+              <button class="btn sm" id="pp">Pause</button>
+              <button class="btn ghost sm" id="rs">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 4: PROGRESS ================= -->
+    <section class="view" id="v-progress" hidden>
+      <div class="wrap">
+        <h1>Progress</h1>
+        <p class="lead" style="margin-top:12px">Aim for four sessions a week. Every saved workout is listed below with its exercises, sets, reps and weights.</p>
+        <!-- Last workout summary (filled in by script.js) -->
+        <div class="panel last">
+          <small>Last workout</small>
+          <b id="lwDate">No workouts saved yet</b>
+          <span id="lwVol"></span>
+        </div>
+        <!-- Three stat boxes. The numbers are filled in by script.js -->
+        <div class="stats">
+          <div><b id="sWeek">0/4</b>sessions this week</div>
+          <div><b id="sStreak">0</b>day streak</div>
+          <div><b id="sAll">0</b>sessions in total</div>
+        </div>
+        <h3 class="sec">Weekly consistency (goal: 4 sessions a week)</h3>
+        <div class="row"><span id="wkTxt"></span><b id="wkPct"></b></div>
+        <div class="meter"><i id="bar"></i></div> <!-- consistency bar -->
+        <h3 class="sec">Session volume by day</h3>
+        <div class="week" id="wk"></div> <!-- Monday to Sunday boxes -->
+
+        <!-- Totals for each exercise across all saved sessions (table built by script.js) -->
+        <h3 class="sec">Exercise summary</h3>
+        <div class="tablewrap" id="xsum"></div>
+
+        <!-- Every saved session with all its exercises, sets, reps and weights (built by script.js) -->
+        <h3 class="sec">Workout history</h3>
+        <div id="hist"></div>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 5: ABOUT (tips + contact) ================= -->
+    <section class="view" id="v-about" hidden>
+      <div class="wrap">
+        <h1>About Liftwise</h1>
+        <p class="lead" style="margin-top:12px">Many beginners wander the gym without a plan. Liftwise gives you a split, a log, and a timer in one place, with no account and no server.</p>
+        <div class="two">
+          <!-- Left: FAQ. <details> opens and closes by itself, no JavaScript needed -->
+          <div>
+            <h2>Beginner tips</h2>
+            <details open><summary>How do I choose a split?</summary><p>Push, pull, and legs train different muscles, so one rests while another works. Rotate through them, and use Full body when your week is short.</p></details>
+            <details><summary>How many sets and reps?</summary><p>Start with 3 sets of 8 to 12 reps. Choose a weight that makes the last two reps hard but clean.</p></details>
+            <details><summary>How long should I rest?</summary><p>60 seconds for light isolation work, 90 for most exercises, and 120 for heavy lifts like squats and presses.</p></details>
+            <details><summary>When should I add weight?</summary><p>When every set hits the top of your rep range with good form, add a small amount next session.</p></details>
+          </div>
+          <!-- Right: contact form (checked by script.js, nothing is sent anywhere) -->
+          <div class="panel">
+            <h2>Contact</h2>
+            <form class="f" id="cf" novalidate onsubmit="return false"> <!-- novalidate: we show our own messages -->
+              <label>Name<input id="cn" autocomplete="name"></label>
+              <label>Email<input id="ce" type="email" autocomplete="email"></label>
+              <label>Message<textarea id="cm" rows="4"></textarea></label>
+              <button class="btn" type="button" id="cBtn">Send message</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 6: LOG IN ================= -->
+    <section class="view" id="v-login">
+      <div class="wrap">
+        <div class="auth">
+          <div class="art" id="loginArt" aria-hidden="true"></div> <!-- illustration, drawn by script.js -->
+          <div class="panel">
+            <h1>Welcome back</h1>
+            <p class="lead" style="margin-top:10px">Log in to see your workouts and progress.</p>
+            <form class="f" id="lf" novalidate onsubmit="return false">
+              <label>Email<input id="le" type="email" autocomplete="email"></label>
+              <label>Password<input id="lp" type="password" autocomplete="current-password"></label>
+              <!-- data-for lists the password field ids this checkbox reveals -->
+              <label class="chk"><input type="checkbox" class="showpw" data-for="lp"> Show password</label>
+              <p class="err storewarn" hidden>Your browser is blocking saved data, so accounts only last until you reload this page.</p>
+              <p class="err" id="lerr" role="alert"></p> <!-- error message appears here -->
+              <button class="btn" type="button" id="lBtn">Log in</button>
+            </form>
+            <p class="alt">New here? <a href="#signup">Create an account</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 7: SIGN UP ================= -->
+    <section class="view" id="v-signup" hidden>
+      <div class="wrap">
+        <div class="auth">
+          <div class="art" id="signupArt" aria-hidden="true"></div>
+          <div class="panel">
+            <h1>Create your account</h1>
+            <p class="lead" style="margin-top:10px">Your workouts are saved separately for each account.</p>
+            <form class="f" id="sf" novalidate onsubmit="return false">
+              <label>Full name<input id="sn" autocomplete="name"></label>
+              <label>Email<input id="se" type="email" autocomplete="email"></label>
+              <label>Password (6 or more characters)<input id="sp" type="password" autocomplete="new-password"></label>
+              <label>Confirm password<input id="sc" type="password" autocomplete="new-password"></label>
+              <label class="chk"><input type="checkbox" class="showpw" data-for="sp,sc"> Show passwords</label>
+              <p class="err storewarn" hidden>Your browser is blocking saved data, so accounts only last until you reload this page.</p>
+              <p class="err" id="serr" role="alert"></p>
+              <button class="btn" type="button" id="sBtn">Sign up</button>
+            </form>
+            <p class="alt">Already have an account? <a href="#login">Log in</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <div class="wrap"><b>Liftwise</b> · a frontend project, your data stays in this browser.</div>
+  </footer>
+
+  <!-- Toast: small popup message; script.js fills it and slides it in -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <!-- All behaviour lives in script.js. It is loaded last so the elements above already exist -->
+  <script src="script.js"></script>
+</body>
+</html>

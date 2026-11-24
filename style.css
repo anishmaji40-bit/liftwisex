@@ -1,0 +1,1082 @@
+/* =========================================================
+   Liftwise - style.css
+   All the visual design of the website: colors, fonts, spacing,
+   layout and responsive (mobile) rules.
+   Linked from index.html with <link rel="stylesheet" href="style.css">.
+   ========================================================= */
+
+/* ==========================================================
+   DESIGN TOKENS (CSS variables)
+   Colors and fonts are defined once here and reused everywhere with var(--name).
+   Change a value here and the whole website updates.
+   ========================================================== */
+:root {
+  --bg: #f4f3fb; /* page background */
+  --card: #fff; /* background of cards and panels */
+  --ink: #1f1d47; /* main text color */
+  --mute: #5c5a82; /* softer text color */
+  --line: #dedcf0; /* borders and dividers */
+  --coral: #ff5a4e; /* Push day color */
+  --blue: #3a5bff; /* Pull day color */
+  --mint: #12a888; /* Leg day color */
+  --sun: #ffb938; /* Full body color */
+  --panel: #2b2a8c; /* indigo hero panel */
+  --hd: "Unbounded","Arial Black",Arial,sans-serif; /* heading font with fallbacks */
+  --bd: "DM Sans",system-ui,sans-serif; /* body font with fallbacks */
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top,0px); /* keep content below a phone notch */
+  padding-bottom: env(safe-area-inset-bottom,0px); /* keep content above the phone home bar */
+}
+
+/* ==========================================================
+   DARK MODE (automatic)
+   Used when the device is set to dark mode, unless the visitor chose light with the Theme button.
+   ========================================================== */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14132e;
+    --card: #1e1d44;
+    --ink: #f1f0ff;
+    --mute: #a8a6d4;
+    --line: #33316a;
+  }
+}
+
+/* ==========================================================
+   DARK MODE (manual)
+   Used when the visitor clicks the Theme button and picks dark. JavaScript sets data-theme on <html>.
+   ========================================================== */
+:root[data-theme="dark"] {
+  --bg: #14132e;
+  --card: #1e1d44;
+  --ink: #f1f0ff;
+  --mute: #a8a6d4;
+  --line: #33316a;
+}
+
+/* ==========================================================
+   1. BASE STYLES
+   Page-wide resets and typography.
+   ========================================================== */
+/* Offset anchor jumps so the sticky header never covers a title */
+html {
+  scroll-padding-top: calc(70px + env(safe-area-inset-top,0px));
+}
+/* Make width include padding and border so sizes are predictable */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+/* Default page look: background, text color, font and line height */
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 17px/1.6 var(--bd);
+}
+/* All headings use the wide display font */
+h1, h2, h3 {
+  font-family: var(--hd);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0;
+}
+/* Main page title. clamp(min, preferred, max) scales it smoothly with screen width */
+h1 {
+  font-size: clamp(2rem,5.4vw,3.6rem);
+}
+/* Section titles */
+h2 {
+  font-size: clamp(1.5rem,3.6vw,2.2rem);
+  margin-bottom: 10px;
+}
+/* Card titles */
+h3 {
+  font-size: 1.05rem;
+}
+/* Remove the default paragraph margin */
+p {
+  margin: 0;
+}
+/* Blue outline when moving with the keyboard (accessibility) */
+:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* ==========================================================
+   2. LAYOUT HELPERS
+   Centered content column and the 'pages' (views) of the site.
+   ========================================================== */
+/* Centers content and limits the width to 1080px */
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+/* Each 'page' of the site is a .view section with space above and below */
+.view {
+  padding: 48px 0 72px;
+}
+/* Pages that are not selected are hidden by JavaScript */
+.view[hidden] {
+  display: none;
+}
+/* Grey intro text under a page title */
+.lead {
+  color: var(--mute);
+  max-width: 56ch;
+  margin-bottom: 26px;
+}
+
+/* ==========================================================
+   3. HEADER AND NAVIGATION
+   Sticky top bar with the logo, page links, login buttons and theme button.
+   ========================================================== */
+/* Sticky bar: stays at the top while scrolling */
+header {
+  position: sticky;
+  top: env(safe-area-inset-top,0px);
+  z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+/* Solid strip behind the phone status bar so page content does not show through */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top,0px);
+  background: var(--bg);
+  z-index: 30;
+}
+/* Menu bar: a flex row that scrolls sideways on very small screens */
+nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 66px;
+  overflow-x: auto;
+}
+/* Site name; margin-right:auto pushes everything else to the right */
+.logo {
+  font: 800 1.25rem var(--hd);
+  text-decoration: none;
+  margin-right: auto;
+  white-space: nowrap;
+}
+/* Menu links, shaped like pills */
+nav a:not(.logo) {
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--mute);
+  padding: 8px 14px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+/* Highlights the link of the page you are on */
+nav a[aria-current=page] {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* ==========================================================
+   4. BUTTONS
+   One base style (.btn) plus modifiers: .ghost (outlined) and .sm (small).
+   ========================================================== */
+/* Base button look */
+.btn {
+  font: 600 1rem var(--bd);
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+  padding: 11px 20px;
+  border-radius: 99px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+/* Outlined button with a see-through background */
+.btn.ghost {
+  background: transparent;
+  color: var(--ink);
+}
+/* Smaller button */
+.btn.sm {
+  padding: 6px 14px;
+  font-size: .9rem;
+}
+/* Fade slightly when the mouse is over a button */
+.btn:hover {
+  opacity: .85;
+}
+
+/* ==========================================================
+   5. HOME PAGE
+   Hero section, illustration panel, feature cards and split cards.
+   ========================================================== */
+/* Two columns: text on the left, illustration on the right */
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 36px;
+  align-items: center;
+}
+/* On narrow screens switch to a single column */
+@media (max-width: 820px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+}
+/* Intro text in the hero */
+.hero p {
+  color: var(--mute);
+  margin: 16px 0 24px;
+  max-width: 46ch;
+  font-size: 1.1rem;
+}
+/* Row that holds the hero buttons */
+.acts {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+/* Indigo panel that holds the body illustration */
+.art {
+  background: var(--panel);
+  border-radius: 28px;
+  padding: 24px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+/* Center the illustration */
+.art svg {
+  display: block;
+  margin: 0 auto;
+}
+/* Space above the barbell drawing */
+.art .bb {
+  margin-top: 6px;
+}
+/* Grid of feature cards; auto-fit wraps them on small screens */
+.three {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+  gap: 18px;
+  margin-top: 56px;
+}
+/* Feature card box */
+.fc {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+}
+/* Feature icon (color is coral) */
+.fc svg {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 10px;
+  color: var(--coral);
+}
+/* Feature description */
+.fc p {
+  color: var(--mute);
+  font-size: .95rem;
+  margin-top: 6px;
+}
+/* Space above the 'Pick today's split' block */
+.band {
+  margin-top: 56px;
+}
+/* Grid of split cards */
+.sp {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(210px,1fr));
+  gap: 16px;
+}
+/* Split card button. --c is set in JS to the split's color, used for the border and tint */
+.spc {
+  border: 0;
+  border-radius: 20px;
+  padding: 18px;
+  text-align: left;
+  cursor: pointer;
+  background: color-mix(in srgb,var(--c) 18%,var(--card));
+  color: var(--ink);
+  font: inherit;
+  border: 2px solid var(--c);
+}
+/* Small body illustration inside a split card */
+.spc svg {
+  height: 120px;
+  display: block;
+  margin: 0 auto 10px;
+}
+/* Lift the card slightly on hover */
+.spc:hover {
+  transform: translateY(-3px);
+}
+/* Short description under the split name */
+.spc span {
+  color: var(--mute);
+  font-size: .9rem;
+  display: block;
+  margin-top: 4px;
+}
+
+/* ==========================================================
+   6. WORKOUTS PAGE
+   Split tabs, search tools and the exercise cards.
+   ========================================================== */
+/* Row of split tab buttons */
+.tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+/* Tab button outlined in the split's color */
+.tabs button {
+  border: 2px solid var(--c);
+  background: transparent;
+  color: var(--ink);
+  font: 600 .95rem var(--bd);
+  padding: 8px 18px;
+  border-radius: 99px;
+  cursor: pointer;
+}
+/* The selected tab is filled with its color */
+.tabs button[aria-pressed=true] {
+  background: var(--c);
+  color: #fff;
+}
+/* Full body is yellow, so it needs dark text */
+.tabs button[data-s=full][aria-pressed=true] {
+  color: #1f1d47;
+}
+/* Row holding the search box and the muscle filter */
+.tools {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 14px 0 22px;
+}
+/* Shared look for text fields, dropdowns and textareas */
+.tools input, .tools select, .f input, .f textarea {
+  font: inherit;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+}
+/* Responsive grid of exercise cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(230px,1fr));
+  gap: 18px;
+}
+/* One exercise card */
+.ex {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+/* Picture area of a card. color:var(--ink) makes the body illustration dark in light mode and light in dark mode */
+.ph {
+  color: var(--ink);
+  height: 160px;
+  background: color-mix(in srgb,var(--c) 16%,var(--card));
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+/* Size of the body illustration */
+.ph svg {
+  height: 140px;
+}
+/* 'GIF placeholder' label in the corner */
+.ph em {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  font: 600 .7rem var(--bd);
+  color: var(--mute);
+  font-style: normal;
+}
+/* Text area inside a card */
+.in {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+/* Muscle group badge */
+.tag {
+  align-self: flex-start;
+  font-size: .8rem;
+  font-weight: 600;
+  padding: 2px 12px;
+  border-radius: 99px;
+  background: var(--c);
+  color: #fff;
+}
+/* Dark text on the yellow badge */
+.tag.full {
+  color: #1f1d47;
+}
+/* margin-top:auto pushes the button to the bottom of the card */
+.in .btn {
+  margin-top: auto;
+}
+
+/* ==========================================================
+   7. LOG PAGE
+   Workout logger on the left, rest timer on the right.
+   ========================================================== */
+/* Wide logger column and narrow timer column */
+.two {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+/* Stack logger and timer on tablets and phones */
+@media (max-width: 860px) {
+  .two {
+    grid-template-columns: 1fr;
+  }
+}
+/* Rounded white box used for the logger, timer and forms */
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+}
+/* Generic row: items spread apart and wrapping on small screens */
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+/* One exercise block inside the logger */
+.log {
+  border-top: 1px solid var(--line);
+  padding: 14px 0;
+}
+/* No divider line above the first exercise */
+.log:first-of-type {
+  border-top: 0;
+}
+/* Grid for each set row: label, reps, weight, delete */
+.sets {
+  display: grid;
+  grid-template-columns: 56px 1fr 1fr 32px;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0;
+}
+/* Reps and weight fields */
+.sets input {
+  width: 100%;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+}
+/* Small × buttons (remove exercise or set) */
+.x {
+  background: none;
+  border: 0;
+  color: var(--mute);
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 4px 8px;
+}
+/* Message shown when there is nothing yet */
+.empty {
+  color: var(--mute);
+  padding: 16px 0;
+}
+/* kg / lbs switch container */
+.seg {
+  display: inline-flex;
+  border: 2px solid var(--ink);
+  border-radius: 99px;
+  overflow: hidden;
+}
+/* One side of the switch */
+.seg button {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: 600 .9rem var(--bd);
+  padding: 5px 14px;
+  cursor: pointer;
+}
+/* The selected unit is filled */
+.seg button[aria-pressed=true] {
+  background: var(--ink);
+  color: var(--bg);
+}
+/* Timer circle container */
+.ring {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 12px auto;
+}
+/* Rotate -90deg so progress starts at the top */
+.ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+/* Both circles are outlines only */
+.ring circle {
+  fill: none;
+  stroke-width: 12;
+}
+/* Grey track */
+.ring .t {
+  stroke: var(--line);
+}
+/* Coral progress ring. dasharray 553 is the circle length (2 x pi x 88) */
+.ring .p {
+  stroke: var(--coral);
+  stroke-linecap: round;
+  stroke-dasharray: 553;
+  stroke-dashoffset: 0;
+}
+/* Countdown number centered over the ring */
+.ring span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 800 2.4rem var(--hd);
+}
+/* Row of timer buttons */
+.pre {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* ==========================================================
+   8. PROGRESS PAGE
+   Stat boxes, consistency bar and the Monday to Sunday strip.
+   ========================================================== */
+/* Row of stat boxes */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+/* One stat box */
+.stats div {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  color: var(--mute);
+}
+/* The big number */
+.stats b {
+  display: block;
+  font: 800 2rem var(--hd);
+  color: var(--ink);
+}
+/* Seven equal columns, one per weekday */
+.week {
+  display: grid;
+  grid-template-columns: repeat(7,1fr);
+  gap: 8px;
+}
+/* One day box */
+.day {
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  text-align: center;
+  padding: 10px 2px 8px;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+/* Green border on days with a saved workout */
+.day.done {
+  border-color: var(--mint);
+}
+/* Outline around today */
+.day.now {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+/* Day name */
+.day b {
+  font: 800 .9rem var(--hd);
+}
+/* Volume text under the bar */
+.day small {
+  color: var(--mute);
+  font-size: .75rem;
+}
+/* Track of the volume bar */
+.vb {
+  height: 110px;
+  width: 70%;
+  display: flex;
+  align-items: flex-end;
+  background: var(--bg);
+  border-radius: 8px;
+  overflow: hidden;
+}
+/* Bar fill; JavaScript sets its height */
+.vb i {
+  display: block;
+  width: 100%;
+  background: var(--mint);
+  height: 0;
+  transition: height .4s;
+}
+/* Track of the consistency bar */
+.meter {
+  height: 14px;
+  background: var(--line);
+  border-radius: 99px;
+  overflow: hidden;
+  margin: 10px 0 24px;
+}
+/* Green fill; JavaScript sets its width */
+.meter i {
+  display: block;
+  height: 100%;
+  background: var(--mint);
+  width: 0;
+  transition: width .4s;
+}
+
+/* ==========================================================
+   9. ABOUT PAGE AND FOOTER
+   FAQ accordion, contact form and page footer.
+   ========================================================== */
+/* One FAQ item */
+details {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+}
+/* The clickable question */
+summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+/* The answer text */
+details p {
+  color: var(--mute);
+  margin-top: 8px;
+  max-width: 64ch;
+}
+/* Form layout: fields stacked with a gap */
+.f {
+  display: grid;
+  gap: 12px;
+}
+/* Label wrapping each field */
+.f label {
+  font-weight: 600;
+  font-size: .9rem;
+  display: grid;
+  gap: 4px;
+}
+/* Page footer */
+footer {
+  border-top: 1px solid var(--line);
+  padding: 30px 0;
+  color: var(--mute);
+}
+/* Spacing between footer links */
+footer a {
+  margin-right: 14px;
+}
+
+/* ==========================================================
+   10. TOAST MESSAGE
+   Small popup that confirms actions such as 'Workout saved'.
+   ========================================================== */
+/* Popup parked below the screen */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom,0px));
+  transform: translate(-50%,120px);
+  background: var(--ink);
+  color: var(--bg);
+  padding: 10px 18px;
+  border-radius: 99px;
+  transition: transform .25s;
+  z-index: 40;
+}
+/* Slides into view when JavaScript adds the class 'on' */
+#toast.on {
+  transform: translate(-50%,0);
+}
+/* Accessibility: switch off animations for people who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none!important;
+  }
+}
+
+/* ==========================================================
+   11. LOGIN AND SIGN UP PAGES
+   Two-column layout: illustration on one side, form on the other.
+   ========================================================== */
+/* Login layout: illustration + form side by side */
+.auth {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: stretch;
+}
+/* Center the illustration vertically */
+.auth .art {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* On narrow screens show one column and hide the illustration */
+@media (max-width: 820px) {
+  .auth {
+    grid-template-columns: 1fr;
+  }
+  .auth .art {
+    display: none;
+  }
+}
+/* Red error message under a form */
+.err {
+  color: #e0334a;
+  font-weight: 600;
+  min-height: 1.4em;
+  font-size: .95rem;
+}
+/* Checkbox row such as 'Show password' */
+.f label.chk {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 400;
+}
+/* Reset the checkbox size */
+.chk input {
+  padding: 0;
+  width: auto;
+}
+/* Text with a link under a form */
+.alt {
+  margin-top: 16px;
+  color: var(--mute);
+}
+/* Make the link bold */
+.alt a {
+  font-weight: 600;
+}
+/* 'Hi, name' greeting in the menu */
+#who {
+  color: var(--mute);
+  white-space: nowrap;
+  font-weight: 600;
+  padding: 0 6px;
+}
+/* Always hide elements with the hidden attribute, even when another rule sets display */
+[hidden] {
+  display: none!important;
+}
+
+/* =========================================================
+   12. EXERCISE GUIDE, SESSION AND POLISH (added later)
+   Richer exercise cards, session summary, last-workout panel,
+   plus hover / pressed states and soft shadows. No JavaScript needed for these.
+   ========================================================= */
+
+/* ----- Exercise cards ----- */
+
+/* Picture area: the muscle map is the base, a photo or GIF is laid on top when available */
+.ph {
+  height: 170px;
+  overflow: hidden;
+}
+
+/* Photo / GIF fills the whole picture area */
+.ph img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Row of small chips (difficulty and equipment) */
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* One chip */
+.chip {
+  font-size: .78rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 99px;
+  border: 1.5px solid var(--line);
+  color: var(--mute);
+}
+
+/* Difficulty colors: green for beginner, yellow for intermediate */
+.lv-beginner {
+  background: color-mix(in srgb, var(--mint) 22%, var(--card));
+  border-color: var(--mint);
+  color: var(--ink);
+}
+.lv-intermediate {
+  background: color-mix(in srgb, var(--sun) 30%, var(--card));
+  border-color: var(--sun);
+  color: var(--ink);
+}
+
+/* Quick facts list (Target / Also works / Start with) */
+.facts {
+  margin: 0;
+}
+.facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  border-top: 1px solid var(--line);
+  font-size: .92rem;
+}
+.facts dt {
+  color: var(--mute);
+}
+.facts dd {
+  margin: 0;
+  text-align: right;
+}
+
+/* "How to do it" dropdown inside a card (native <details>) */
+.ex details {
+  margin: 0;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-radius: 10px;
+}
+.ex summary {
+  font-size: .92rem;
+}
+.ex ol, .ex ul {
+  margin: 8px 0;
+  padding-left: 20px;
+  color: var(--mute);
+  font-size: .92rem;
+}
+.ex li {
+  margin-bottom: 4px;
+}
+.cues li::marker {
+  color: var(--c);
+}
+.cues-h {
+  font-weight: 600;
+  font-size: .85rem;
+  margin-top: 8px;
+}
+
+/* ----- Split note under the tabs ----- */
+.note {
+  border-left: 6px solid var(--c);
+  background: var(--card);
+  padding: 12px 16px;
+  border-radius: 0 12px 12px 0;
+  display: grid;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.note i {
+  font-style: normal;
+  color: var(--mute);
+}
+
+/* ----- Log page: session summary and column headings ----- */
+.session {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.session div {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.session b {
+  display: block;
+  font-size: 1rem;
+}
+
+/* Small grey uppercase labels used for headings (Exercise, Set, Reps, Weight, Last workout...) */
+.session small, .lab, .sets small, .last small {
+  color: var(--mute);
+  font-size: .74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.lab {
+  display: block;
+}
+
+/* ----- Progress page ----- */
+.last {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 18px;
+  border-left: 6px solid var(--mint);
+}
+.last b {
+  font: 800 1.3rem var(--hd);
+}
+.last span {
+  color: var(--mute);
+}
+.sec {
+  margin: 22px 0 10px;
+}
+
+/* ----- Polish: hover and pressed states ----- */
+.btn {
+  transition: transform .1s, opacity .15s, box-shadow .15s;
+}
+.btn:hover {
+  opacity: .92;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .22);
+}
+/* Pressed: the button moves down slightly and shrinks a little */
+.btn:active, .tabs button:active, .spc:active {
+  transform: translateY(1px) scale(.98);
+  box-shadow: none;
+}
+
+/* ----- Polish: soft card shadows and lift on hover ----- */
+.ex, .panel, .fc, .stats div, .day, .note {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+.ex {
+  transition: transform .15s, box-shadow .15s;
+}
+.ex:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .18);
+}
+
+/* ----- Polish: highlight the active split tab ----- */
+.tabs button {
+  transition: transform .15s, box-shadow .15s, background .15s;
+}
+.tabs button:hover {
+  background: color-mix(in srgb, var(--c) 18%, transparent);
+}
+.tabs button[aria-pressed=true] {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--c) 50%, transparent);
+}
+
+/* ----- Red message bar shown only if the script fails to start ----- */
+.loadmsg {
+  background: #e0334a;
+  color: #fff;
+  padding: 10px 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* ----- Progress page: exercise summary and workout history ----- */
+
+/* Lets wide tables scroll sideways on small screens instead of breaking the layout */
+.tablewrap {
+  overflow-x: auto;
+}
+
+/* Tables used in the summary and in each history session */
+.ht {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  font-size: .92rem;
+}
+.ht th {
+  text-align: left;
+  font-size: .74rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--mute);
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--line);
+  white-space: nowrap;
+}
+.ht td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* One saved session (a native <details> block) */
+.sess summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+}
+.sess summary span {
+  color: var(--mute);
+  font-weight: 400;
+  font-size: .92rem;
+}
+
+/* One exercise inside a session */
+.hx {
+  margin: 14px 0;
+  overflow-x: auto;
+}
+.hx .row {
+  margin-bottom: 6px;
+}
+.hx small {
+  color: var(--mute);
+  display: block;
+  margin-top: 6px;
+}
+
+/* Muscle badge inside history: give it its own color (the --c variable only exists inside exercise cards) */
+.hx .tag {
+  --c: var(--panel);
+}
